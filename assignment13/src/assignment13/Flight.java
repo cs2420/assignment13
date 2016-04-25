@@ -7,7 +7,7 @@ public class Flight {
 	protected HashSet<String> CARRIER;
 	protected Airport comingFrom;
 	protected Airport goingTo;
-	protected int duplicates;
+	protected int frequency;
 	protected String name;
 
 	public Flight(double cost, double delay, double distance, double canceled, double time,
@@ -21,7 +21,7 @@ public class Flight {
 		CARRIER.add(carrier);
 		this.comingFrom = comingFrom;
 		this.goingTo = goingTo;
-		duplicates = 1;
+		frequency = 1;
 		name = comingFrom.name +" to "+ goingTo.name;
 	}
 	@Override

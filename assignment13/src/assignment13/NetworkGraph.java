@@ -91,23 +91,23 @@ public class NetworkGraph {
 						.get(originAirport.name + " to "
 								+ destinationAirport.name);
 				existingFlight.CARRIER.add(flight[2]);
-				existingFlight.DELAY = ((existingFlight.DELAY * existingFlight.duplicates) + Double
+				existingFlight.DELAY = ((existingFlight.DELAY * existingFlight.frequency) + Double
 						.parseDouble(flight[3]))
-						/ (existingFlight.duplicates + 1);
-				existingFlight.CANCELED = ((existingFlight.CANCELED * existingFlight.duplicates) + Double
+						/ (existingFlight.frequency + 1);
+				existingFlight.CANCELED = ((existingFlight.CANCELED * existingFlight.frequency) + Double
 						.parseDouble(flight[4]))
-						/ (existingFlight.duplicates + 1);
-				existingFlight.TIME = ((existingFlight.TIME * existingFlight.duplicates) + Double
+						/ (existingFlight.frequency + 1);
+				existingFlight.TIME = ((existingFlight.TIME * existingFlight.frequency) + Double
 						.parseDouble(flight[5]))
-						/ (existingFlight.duplicates + 1);
-				existingFlight.DISTANCE = ((existingFlight.DISTANCE * existingFlight.duplicates) + Double
+						/ (existingFlight.frequency + 1);
+				existingFlight.DISTANCE = ((existingFlight.DISTANCE * existingFlight.frequency) + Double
 						.parseDouble(flight[6]))
-						/ (existingFlight.duplicates + 1);
-				existingFlight.COST = ((existingFlight.COST * existingFlight.duplicates) + Double
+						/ (existingFlight.frequency + 1);
+				existingFlight.COST = ((existingFlight.COST * existingFlight.frequency) + Double
 						.parseDouble(flight[7]))
-						/ (existingFlight.duplicates + 1);
+						/ (existingFlight.frequency + 1);
 
-				existingFlight.duplicates++;
+				existingFlight.frequency++;
 			}
 		}
 		scan.close();
