@@ -10,7 +10,7 @@ public class Flight {
 	protected Airport goingTo;
 	protected int frequency;
 	protected String name;
-	protected boolean visited;
+	protected double currentCost;
 
 	public Flight(double cost, double delay, double distance, double canceled, double time,
 			String carrier, Airport comingFrom, Airport goingTo) {
@@ -25,7 +25,7 @@ public class Flight {
 		this.goingTo = goingTo;
 		frequency = 1;
 		name = comingFrom.name +" to "+ goingTo.name;
-		visited = false;
+		currentCost = 0;
 	}
 	@Override
 	public String toString(){
