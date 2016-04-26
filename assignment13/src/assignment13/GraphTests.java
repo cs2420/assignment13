@@ -37,7 +37,7 @@ public class GraphTests {
 		assertEquals(2, airports.get("JAC").edges.size());
 	}
 	@Test
-	public void FlightsAveragedCorrectly() {
+	public void PTXtoZJNflight() {
 		HashMap<String, Airport> airports = graph.getAirports();
 		HashMap<String, Flight> ptxFlights = airports.get("PTX").edges;
 		Flight ptxToZjn = ptxFlights.get("PTX to ZJN");
@@ -48,7 +48,21 @@ public class GraphTests {
 		assertEquals(189.5, ptxToZjn.DELAY, 0);
 		assertTrue(ptxToZjn.CARRIER.contains("AA"));
 		assertTrue(ptxToZjn.CARRIER.contains("DL"));
-		assertFalse(ptxToZjn.CARRIER.contains("EV"));	
+		assertFalse(ptxToZjn.CARRIER.contains("EV"));
+		assertEquals(ptxToZjn.CARRIER.size(), 2);
+	}
+	@Test
+	public void ZJNtoJACflight() {
+		HashMap<String, Airport> airports = graph.getAirports();
+		HashMap<String, Flight> zjnFlights = airports.get("ZJN").edges;
+		Flight zjnToJac = zjnFlights.get("ZJN to JAC");
+		assertEquals(658.95, zjnToJac.COST, 0);
+		assertEquals(959, zjnToJac.DISTANCE, 0);
+		assertEquals(138, zjnToJac.TIME, 0);
+		assertEquals(1, zjnToJac.CANCELED, 0);
+		assertEquals(470, zjnToJac.DELAY, 0);
+		assertTrue(zjnToJac.CARRIER.contains("HA"));
+		assertEquals(zjnToJac.CARRIER.size(), 1);
 	}
 
 }

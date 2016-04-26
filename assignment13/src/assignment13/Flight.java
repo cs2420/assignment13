@@ -1,5 +1,6 @@
 package assignment13;
 
+import java.util.Comparator;
 import java.util.HashSet;
 
 public class Flight {
@@ -9,6 +10,7 @@ public class Flight {
 	protected Airport goingTo;
 	protected int frequency;
 	protected String name;
+	protected boolean visited;
 
 	public Flight(double cost, double delay, double distance, double canceled, double time,
 			String carrier, Airport comingFrom, Airport goingTo) {
@@ -23,9 +25,11 @@ public class Flight {
 		this.goingTo = goingTo;
 		frequency = 1;
 		name = comingFrom.name +" to "+ goingTo.name;
+		visited = false;
 	}
 	@Override
 	public String toString(){
 		return name;
 	}
+	
 }

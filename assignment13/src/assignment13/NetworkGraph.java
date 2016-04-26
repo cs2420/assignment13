@@ -8,7 +8,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Scanner;
 
 /**
@@ -202,10 +207,81 @@ public class NetworkGraph {
 	 */
 	public BestPath getBestPath(String origin, String destination,
 			FlightCriteria criteria) {
+		PriorityQueue<Flight> queue = new PriorityQueue<Flight>(new CostCompare(criteria));
+		queue.addAll((Collection<? extends Flight>) airports.get(origin).edges);
+		Flight curr;
+		while(!queue.isEmpty()){
+			curr = queue.remove();
+			if(curr.goingTo == airports.get(destination)){
+				//destination found
+				return null;
+			}
+			curr.visited = true;
+			for (HashMap.Entry<String, Flight> entry : curr.goingTo.edges.entrySet())
+			{
+			    System.out.println(entry.getKey() + "/" + entry.getValue());
+			}
+		}
+		
+		
+		
 		// TODO: First figure out what kind of path you need to get (HINT: Use a
 		// switch!) then
 		// Search for the shortest path using Dijkstra's algorithm.
 		return null;
+	}
+	
+	private double cost(FlightCriteria cost, Flight flight){
+		double value = 0;
+		switch(cost){
+		case COST:
+			value = flight.COST;
+			break;
+		case DELAY:
+			value = flight.DELAY;
+			break;
+		case DISTANCE:
+			value = flight.DISTANCE;
+			break;
+		case CANCELED:
+			value = flight.CANCELED;
+			break;
+		case TIME:
+			value = flight.TIME;
+			break;
+		}
+		return value;
+	}
+	
+	private static final class CostCompare implements Comparator<Flight>{
+		FlightCriteria cost;
+		private CostCompare(FlightCriteria cost){
+			this.cost = cost;
+		}
+
+		@Override
+		public int compare(Flight arg0, Flight arg1) {
+			int value = 0;
+			switch(cost){
+			case COST:
+				value = (int) (arg0.COST - arg1.COST);
+				break;
+			case DELAY:
+				value = (int) (arg0.DELAY - arg1.DELAY);
+				break;
+			case DISTANCE:
+				value = (int) (arg0.DISTANCE - arg1.DISTANCE);
+				break;
+			case CANCELED:
+				value = (int) (arg0.CANCELED - arg1.CANCELED);
+				break;
+			case TIME:
+				value = (int) (arg0.TIME - arg1.TIME);
+				break;
+			}
+			return value;
+		}
+		
 	}
 
 	/**
