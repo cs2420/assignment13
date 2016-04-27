@@ -8,14 +8,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Scanner;
 
@@ -44,7 +38,7 @@ import java.util.Scanner;
  */
 public class NetworkGraph {
 
-	private HashMap<String, Airport> airports;
+	protected HashMap<String, Airport> airports;
 
 	/**
 	 * <p>
@@ -173,11 +167,6 @@ public class NetworkGraph {
 
 	}
 
-	// testing
-	public static void main(String[] args) throws FileNotFoundException {
-		NetworkGraph graph = new NetworkGraph("flights-2015-q3.csv");
-	}
-
 	public HashMap<String, Airport> getAirports() {
 		return airports;
 	}
@@ -210,70 +199,47 @@ public class NetworkGraph {
 	 */
 	public BestPath getBestPath(String origin, String destination,
 			FlightCriteria criteria) {
-		for (HashMap.Entry<String, Airport> entry : airports.entrySet()) {
-			entry.getValue().cost = Double.POSITIVE_INFINITY;
-			entry.getValue().visited = false;
+		return getBestPath(origin, destination, criteria, null);
+		
+	}
+
+	private BestPath nullAirportPath(Airport origin, Airport destination) {
+		BestPath result = new BestPath();
+		result.path = new ArrayList<String>();
+		if(origin == null && destination == null){
+			result.path.add(null);
+			result.path.add(null);
 		}
-		PriorityQueue<Airport> queue = new PriorityQueue<Airport>();
-		airports.get(origin).cost = 0;
-		queue.add(airports.get(origin));
-		Airport curr;
-		while (!queue.isEmpty()) {
-			curr = queue.remove();
-			if (curr == airports.get(destination)) {
-				// destination found
-				return createPath(airports.get(origin), curr);
-			}
-			curr.visited = true;
-			ArrayList<Airport> arr = new ArrayList<Airport>(queue);
-			for (HashMap.Entry<String, Flight> entry : curr.edges.entrySet()) {
-				Airport currDestination = entry.getValue().goingTo;
-
-				if (currDestination.visited) {
-					continue;
-				}
-
-				if (currDestination.cost > curr.cost
-						+ cost(criteria, entry.getValue())) {
-					currDestination.comingFrom = curr;
-					currDestination.cost = curr.cost
-							+ cost(criteria, entry.getValue());
-					// Add destination to the queue, if it's already there,
-					// update its position in queue
-					if (queue.contains(currDestination)) {
-						for (int i = 0; i < arr.size(); i++) {
-							if (arr.get(i).name.equals(currDestination.name)) {
-								arr.set(i, currDestination);
-								break;
-							}
-						}
-						// replace
-					} else {
-						arr.add(currDestination);
-					}
-				}
-
-				// System.out.println(entry.getKey() + "/" + entry.getValue());
-			}
-
-			queue.clear();
-			queue.addAll(arr);
+		else if(origin == null){
+			result.path.add(null);
+			result.path.add(destination.name);
 		}
+		else{
+			result.path.add(origin.name);
+			result.path.add(null);
+		}
+		result.pathLength = 0;
+		return result;
+	}
 
-		return null;
+	private BestPath createEmptyPath() {
+		BestPath result = new BestPath();
+		result.path = new ArrayList<String>();
+		result.pathLength = 0;
+		return result;
 	}
 
 	private BestPath createPath(Airport origin, Airport destination) {
+		BestPath result = new BestPath();
+		result.path = new ArrayList<String>();
 		Airport path = destination;
 		LinkedList<String> list = new LinkedList<String>();
-		BestPath result = new BestPath();
 		while (path != origin) {
 			list.addFirst(path.name);
 			path = path.comingFrom;
 		}
 		list.addFirst(path.name);
-		result.pathLength = destination.cost;
-		result.path = new ArrayList<String>();
+		result.pathLength = (double)Math.round(destination.cost * 100) / 100;
 		result.path.addAll(list);
 		return result;
 	}
@@ -295,37 +261,7 @@ public class NetworkGraph {
 
 	}
 
-	private static final class CostCompare implements Comparator<Flight> {
-		FlightCriteria cost;
-
-		private CostCompare(FlightCriteria cost) {
-			this.cost = cost;
-		}
-
-		@Override
-		public int compare(Flight arg0, Flight arg1) {
-			int value = 0;
-			switch (cost) {
-			case COST:
-				value = (int) (arg0.COST - arg1.COST);
-				break;
-			case DELAY:
-				value = (int) (arg0.DELAY - arg1.DELAY);
-				break;
-			case DISTANCE:
-				value = (int) (arg0.DISTANCE - arg1.DISTANCE);
-				break;
-			case CANCELED:
-				value = (int) (arg0.CANCELED - arg1.CANCELED);
-				break;
-			case TIME:
-				value = (int) (arg0.TIME - arg1.TIME);
-				break;
-			}
-			return value;
-		}
-
-	}
+	
 
 	/**
 	 * <p>
@@ -355,6 +291,12 @@ public class NetworkGraph {
 	 */
 	public BestPath getBestPath(String origin, String destination,
 			FlightCriteria criteria, String airliner) {
+		if(!airports.containsKey(origin) || !airports.containsKey(destination)){
+			return createEmptyPath();
+		}
+		if(airports.get(origin) == null || airports.get(destination) == null){
+			return nullAirportPath(airports.get(origin),airports.get(destination));
+		}
 		for (HashMap.Entry<String, Airport> entry : airports.entrySet()) {
 			entry.getValue().cost = Double.POSITIVE_INFINITY;
 			entry.getValue().visited = false;
@@ -372,7 +314,7 @@ public class NetworkGraph {
 			curr.visited = true;
 			ArrayList<Airport> arr = new ArrayList<Airport>(queue);
 			for (HashMap.Entry<String, Flight> entry : curr.edges.entrySet()) {
-				if (!entry.getValue().CARRIER.contains(airliner)) {
+				if (airliner!=null && !entry.getValue().CARRIER.contains(airliner)) {
 					continue;
 				} 
 				Airport currDestination = entry.getValue().goingTo;
@@ -401,12 +343,13 @@ public class NetworkGraph {
 					}
 				}
 
-				// System.out.println(entry.getKey() + "/" + entry.getValue());
 			}
 
 			queue.clear();
 			queue.addAll(arr);
 		}
-		return createPath(airports.get(origin), airports.get(destination));
+
+		return createEmptyPath();
 	}
+	
 }

@@ -1,6 +1,6 @@
 package assignment13;
 
-import java.util.Comparator;
+
 import java.util.HashSet;
 
 public class Flight {
