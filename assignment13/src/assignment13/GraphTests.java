@@ -2,6 +2,7 @@ package assignment13;
 
 import static org.junit.Assert.*;
 
+
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +10,12 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Assesses the functionality of the graph created by NetworkGraph and its best path finding methods
+ * 
+ * @author Connor Ottenbacher and Doug Garding
+ *
+ */
 public class GraphTests {
 	NetworkGraph graph;
 

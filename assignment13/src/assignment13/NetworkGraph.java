@@ -34,10 +34,11 @@ import java.util.Scanner;
  * to completed the task at hand
  * </p>
  *
- * @author CS2420 Teaching Staff - Spring 2016
+ * @author Connor Ottenbacher and Doug Garding
  */
 public class NetworkGraph {
 
+	// contains a list of all the airports contained in the input file
 	protected HashMap<String, Airport> airports;
 
 	/**
@@ -75,8 +76,9 @@ public class NetworkGraph {
 		// Add each line of data into the map
 		while (scan.hasNext()) {
 			String[] flight = scan.next().split(",");
-			Airport originAirport = createAirport(flight).get(0);
-			Airport destinationAirport = createAirport(flight).get(1);
+			// helper methods create airports
+			Airport originAirport = createAirport(flight)[0];
+			Airport destinationAirport = createAirport(flight)[1];
 
 			// If flight doesn't exist, create it
 			if (!originAirport.edges.containsKey(originAirport.name + " to "
@@ -117,41 +119,43 @@ public class NetworkGraph {
 	}
 
 	/**
-	 * Returns a two item array list with an origin and destination airport.
+	 * Creates two airports using lines of the input file(as a string[]).
+	 * Returns them as an array
 	 * 
 	 * @param flight
 	 * @return
 	 */
-	private ArrayList<Airport> createAirport(String[] flight) {
-		ArrayList<Airport> list = new ArrayList<>();
+	private Airport[] createAirport(String[] flight) {
+		Airport[] list = new Airport[2];
 
 		// Add origin airport to list
 		if (airports.containsKey(flight[0])) {
-			list.add(airports.get(flight[0]));
+			list[0] = airports.get(flight[0]);
+			// creates new airport and adds it
 		} else {
 			Airport originAirport = new Airport(flight[0]);
 			airports.put(flight[0], originAirport);
-			list.add(originAirport);
+			list[0] = originAirport;
 		}
 
 		// Add destination airport to list
 		if (airports.containsKey(flight[1])) {
-			list.add(airports.get(flight[1]));
+			list[1] = airports.get(flight[1]);
+			// creates new airport and adds it to the list
 		} else {
 			Airport destinationAirport = new Airport(flight[1]);
 			airports.put(flight[1], destinationAirport);
-			list.add(destinationAirport);
+			list[1] = destinationAirport;
 		}
 
 		return list;
 	}
 
 	/**
-	 * Helper method that creates a Flight (edge).
+	 * Creates a Flight (edge).
 	 *
 	 * @param Flight
 	 *            [] flightArray
-	 * @return Flight
 	 */
 	private Flight createFlight(String[] flightArray, Airport origin,
 			Airport destination) {
@@ -167,7 +171,10 @@ public class NetworkGraph {
 
 	}
 
-	public HashMap<String, Airport> getAirports() {
+	/**
+	 * Helper method used for testing
+	 */
+	protected HashMap<String, Airport> getAirports() {
 		return airports;
 	}
 
@@ -199,35 +206,55 @@ public class NetworkGraph {
 	 */
 	public BestPath getBestPath(String origin, String destination,
 			FlightCriteria criteria) {
+		// Uitilizes Djikstras algorithm found in the other getBestPath method,
+		// using null as the Carrier parameter
 		return getBestPath(origin, destination, criteria, null);
-		
+
 	}
 
+	/**
+	 * Helper method used when at least one of the airports are null, returns a
+	 * path that includes one or two null airports
+	 * 
+	 * @param origin
+	 * @param destination
+	 */
 	private BestPath nullAirportPath(Airport origin, Airport destination) {
 		BestPath result = new BestPath();
 		result.path = new ArrayList<String>();
-		if(origin == null && destination == null){
+		// if statements determine which airports are null and creates the
+		// appropriate path
+		if (origin == null && destination == null) {
 			result.path.add(null);
 			result.path.add(null);
-		}
-		else if(origin == null){
+		} else if (origin == null) {
 			result.path.add(null);
 			result.path.add(destination.name);
-		}
-		else{
+		} else {
 			result.path.add(origin.name);
 			result.path.add(null);
 		}
+		// path length with a null airport will always be 0
 		result.pathLength = 0;
 		return result;
 	}
 
+	/**
+	 * Creates an empty path. Used when an airport is not found
+	 */
 	private BestPath createEmptyPath() {
 		BestPath result = new BestPath();
 		result.path = new ArrayList<String>();
 		result.pathLength = 0;
 		return result;
 	}
+
+	/**
+	 * Reconstructs the best path from the destination to the origin
+	 * 
+	 * @param origin
+	 * @param destination
+	 */
 
 	private BestPath createPath(Airport origin, Airport destination) {
 		BestPath result = new BestPath();
@@ -239,11 +266,18 @@ public class NetworkGraph {
 			path = path.comingFrom;
 		}
 		list.addFirst(path.name);
-		result.pathLength = (double)Math.round(destination.cost * 100) / 100;
+		result.pathLength = (double) Math.round(destination.cost * 100) / 100;
 		result.path.addAll(list);
 		return result;
 	}
 
+	/**
+	 * Returns the appropriate cost a flight based on the given criteria
+	 * 
+	 * @param cost
+	 *            , criteria being used
+	 * @param flight
+	 */
 	private double cost(FlightCriteria cost, Flight flight) {
 		switch (cost) {
 		case COST:
@@ -260,8 +294,6 @@ public class NetworkGraph {
 		return 0;
 
 	}
-
-	
 
 	/**
 	 * <p>
@@ -291,65 +323,85 @@ public class NetworkGraph {
 	 */
 	public BestPath getBestPath(String origin, String destination,
 			FlightCriteria criteria, String airliner) {
-		if(!airports.containsKey(origin) || !airports.containsKey(destination)){
+		// One of the airports was not found in the graph, returns an empty path
+		if (!airports.containsKey(origin) || !airports.containsKey(destination)) {
 			return createEmptyPath();
 		}
-		if(airports.get(origin) == null || airports.get(destination) == null){
-			return nullAirportPath(airports.get(origin),airports.get(destination));
+		// One of the airports was null, returns a path with at least one null
+		// airport and 0 cost
+		if (airports.get(origin) == null || airports.get(destination) == null) {
+			return nullAirportPath(airports.get(origin),
+					airports.get(destination));
 		}
+		// Prepares all airports for use in Djikstras algorithm
 		for (HashMap.Entry<String, Airport> entry : airports.entrySet()) {
 			entry.getValue().cost = Double.POSITIVE_INFINITY;
 			entry.getValue().visited = false;
 		}
+		// Begins Djikstras algorithm
 		PriorityQueue<Airport> queue = new PriorityQueue<Airport>();
 		airports.get(origin).cost = 0;
 		queue.add(airports.get(origin));
 		Airport curr;
 		while (!queue.isEmpty()) {
 			curr = queue.remove();
+			// Checks if the destination was found
 			if (curr == airports.get(destination)) {
-				// destination found
 				return createPath(airports.get(origin), curr);
 			}
 			curr.visited = true;
+			// Creates an arraylist which contains all items in the queue, used
+			// to update the cost of items in the queue
 			ArrayList<Airport> arr = new ArrayList<Airport>(queue);
+			// iterates through all the flights of the current airport
 			for (HashMap.Entry<String, Flight> entry : curr.edges.entrySet()) {
-				if (airliner!=null && !entry.getValue().CARRIER.contains(airliner)) {
+				// checks if airliner was used as a parameter and whether or not
+				// the specified airliner supports each flight
+				if (airliner != null
+						&& !entry.getValue().CARRIER.contains(airliner)) {
+					// flight is ignored if it does not have the specified
+					// airliner/carrier
 					continue;
-				} 
+				}
 				Airport currDestination = entry.getValue().goingTo;
 
+				// skips airports that have already been visited
 				if (currDestination.visited) {
 					continue;
 				}
 
+				// finds the most cost efficient airport to travel to
 				if (currDestination.cost > curr.cost
 						+ cost(criteria, entry.getValue())) {
 					currDestination.comingFrom = curr;
 					currDestination.cost = curr.cost
 							+ cost(criteria, entry.getValue());
-					// Add destination to the queue, if it's already there,
-					// update its position in queue
+					// If the airport is already contained within the queue,
+					// updates its cost in the arraylist copy
 					if (queue.contains(currDestination)) {
+						// finds the airport
 						for (int i = 0; i < arr.size(); i++) {
 							if (arr.get(i).name.equals(currDestination.name)) {
 								arr.set(i, currDestination);
 								break;
 							}
 						}
-						// replace
+						// New airports are added to the copy arraylist
 					} else {
 						arr.add(currDestination);
 					}
 				}
 
 			}
-
+			// queue is cleared and re-set with the updated airports in the copy
+			// array
 			queue.clear();
 			queue.addAll(arr);
 		}
 
+		// no possible paths exist from the origin to the destination, returns
+		// an empty path
 		return createEmptyPath();
 	}
-	
+
 }
